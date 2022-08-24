@@ -19,7 +19,14 @@ var coelhoSpr;
 var botao;
 var blink;
 var eat;
-var sad
+var sad;
+var musicaDeFundo;
+var cut;
+var sadS;
+var eatS;
+var air;
+var balao;
+var muteBotao;
 
 function preload()  {
   backgroundImg = loadImage("background.png");
@@ -28,6 +35,11 @@ function preload()  {
   blink = loadAnimation("blink_1.png","blink_1.png","blink_1.png","blink_2.png","blink_3.png");
   eat = loadAnimation("eat_0.png","eat_1.png","eat_2.png","eat_3.png","eat_4.png");
   sad = loadAnimation("sad_1.png","sad_2.png", "sad_3.png");
+  musicaDeFundo = loadSound("sound1.mp3");
+  cut = loadSound("rope_cut.mp3");
+  sadS = loadSound("sad.wav");
+  eatS = loadSound("eating_sound.mp3");
+  air = loadSound("air.wav");
 
   blink.playing = true;
   eat.playing = true;
@@ -44,6 +56,9 @@ function setup() {
   engine = Engine.create();
   world = engine.world;
  
+  musicaDeFundo.play();
+  musicaDeFundo.setVolume(0.2);
+
   rectMode(CENTER);
   ellipseMode(RADIUS);
   imageMode(CENTER);
@@ -52,7 +67,7 @@ function setup() {
   blink.frameDelay = 4;
   eat.frameDelay = 10;
 
-  coelhoSpr = createSprite(250, 590, 100, 100);
+  coelhoSpr = createSprite(420, 590, 100, 100);
   coelhoSpr.addImage(coelho);
   coelhoSpr.scale = 0.3;
   coelhoSpr.addAnimation("piscando", blink);
@@ -64,6 +79,16 @@ function setup() {
   botao.position(220, 30);
   botao.size(50, 50);
   botao.mouseClicked(Break);
+
+  balao = createImg("balloon.png");
+  balao.position(10, 210);
+  balao.size(150, 100);
+  balao.mouseClicked(Assoprar);
+
+  muteBotao = createImg("mute.png");
+  muteBotao.position(450, 20);
+  muteBotao.size(50, 50);
+  muteBotao.mouseClicked(Mute);
 
   chao = new Chao(200,690,600,20);
   rope = new Rope(6,{x: 245, y: 30});
@@ -91,10 +116,14 @@ function draw() {
 
   if (Collision(coelhoSpr, fruta) === true) {
     coelhoSpr.changeAnimation("comendo");
+    eatS.play()
   }
 
   if (fruta !== null && fruta.position.y >= 650) {
     coelhoSpr.changeAnimation("triste");
+    sadS.play();
+    musicaDeFundo.stop();
+    fruta = null;
   }
 }
 
@@ -103,6 +132,7 @@ function Break() {
   conexao.break();
   rope.break();
   conexao = null;
+  cut.play();
 }
 
 function Collision(coelho, corpo) {
@@ -120,4 +150,18 @@ function Collision(coelho, corpo) {
   }
 
 
+}
+
+function Assoprar() {
+  Matter.Body.applyForce(fruta, {x: 0, y: 0}, {x: 0.01, y: 0});
+  air.play();
+}
+
+function Mute() {
+  if (musicaDeFundo.isPlaying()) {
+    musicaDeFundo.stop();
+  }
+  else {
+    musicaDeFundo.play();
+  }
 }
